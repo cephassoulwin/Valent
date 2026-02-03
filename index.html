@@ -7,12 +7,13 @@
     body {
       margin: 0;
       height: 100vh;
-      background: #ffd6cc;
+      background: #ffd6cc; /* Peach background */
       display: flex;
       align-items: center;
       justify-content: center;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       overflow: hidden;
+      user-select: none;
     }
 
     .card {
@@ -26,12 +27,14 @@
       left: 50%;
       transform: translate(-50%, -50%);
       z-index: 9999;
+      width: 320px;
     }
 
     h1 {
       color: #d6336c;
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       margin-bottom: 30px;
+      user-select: text;
     }
 
     .buttons {
@@ -47,11 +50,16 @@
       border: none;
       cursor: pointer;
       transition: all 0.3s ease;
+      position: absolute;
+      top: 0;
+      user-select: none;
     }
 
+    /* YES button on left */
     #yes {
       background: #ff4d6d;
       color: white;
+      left: 20px;
     }
 
     #yes:hover {
@@ -59,15 +67,14 @@
       background: #e0315b;
     }
 
+    /* NO button on right */
     #no {
       background: #adb5bd;
       color: white;
-      position: absolute;
-      left: 160px;
-      top: 0;
+      left: 180px; /* Right of YES */
     }
 
-    /* Hearts */
+    /* Floating hearts */
     .heart {
       position: absolute;
       color: #ff5d8f;
@@ -79,14 +86,8 @@
     }
 
     @keyframes float {
-      from {
-        transform: translateY(100vh) scale(1);
-        opacity: 1;
-      }
-      to {
-        transform: translateY(-10vh) scale(1.5);
-        opacity: 0;
-      }
+      from { transform: translateY(100vh) scale(1); opacity: 1; }
+      to { transform: translateY(-10vh) scale(1.5); opacity: 0; }
     }
 
     /* Confetti */
@@ -98,13 +99,11 @@
       animation: fall 3s linear forwards;
       pointer-events: none;
       border-radius: 2px;
+      will-change: transform;
     }
 
     @keyframes fall {
-      to {
-        transform: translateY(100vh) rotate(720deg);
-        opacity: 0;
-      }
+      to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
     }
   </style>
 </head>
@@ -120,8 +119,58 @@
 
   <script>
     const noBtn = document.getElementById('no');
+    const yesBtn = document.getElementById('yes');
 
-    // Make NO button run away and spin away from cursor
+    // NO button runs away and rotates when mouse is near
     document.addEventListener('mousemove', (e) => {
       const rect = noBtn.getBoundingClientRect();
-      const b
+      const btnX = rect.left + rect.width / 2;
+      const btnY = rect.top + rect.height / 2;
+
+      const dist = Math.hypot(e.clientX - btnX, e.clientY - btnY);
+
+      if (dist < 120) {
+        let newX = Math.random() * (window.innerWidth - rect.width);
+        let newY = Math.random() * (window.innerHeight - rect.height);
+
+        noBtn.style.left = `${newX}px`;
+        noBtn.style.top = `${newY}px`;
+
+        const rotateDeg = Math.floor(Math.random() * 360);
+        noBtn.style.transform = `rotate(${rotateDeg}deg)`;
+      }
+    });
+
+    // YES button triggers confetti poppers
+    yesBtn.addEventListener('click', () => {
+      for (let i = 0; i < 150; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * window.innerWidth + 'px';
+        confetti.style.top = '-10px';
+        confetti.style.background = `hsl(${Math.random() * 360}, 100%, 70%)`;
+        confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        document.body.appendChild(confetti);
+
+        setTimeout(() => confetti.remove(), 4000);
+      }
+      alert('YAY!!! 💖💖💖');
+    });
+
+    // Floating hearts animation
+    setInterval(() => {
+      const heart = document.createElement('div');
+      heart.className = 'heart';
+      heart.innerText = '💗';
+      heart.style.left = Math.random() * 100 + 'vw';
+      heart.style.fontSize = 15 + Math.random() * 30 + 'px';
+      heart.style.animationDuration = 4 + Math.random() * 4 + 's';
+      document.body.appendChild(heart);
+
+      setTimeout(() => heart.remove(), 7000);
+    }, 300);
+  </script>
+
+</body>
+</html>
