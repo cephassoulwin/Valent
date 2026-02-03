@@ -7,7 +7,7 @@
     body {
       margin: 0;
       height: 100vh;
-      background: #ffd6cc; /* Peach background */
+      background: #ffd6cc;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -49,13 +49,12 @@
       border-radius: 30px;
       border: none;
       cursor: pointer;
-      transition: all 0.3s ease;
       position: absolute;
       top: 0;
       user-select: none;
+      transition: all 0.2s ease;
     }
 
-    /* YES button on left */
     #yes {
       background: #ff4d6d;
       color: white;
@@ -67,14 +66,12 @@
       background: #e0315b;
     }
 
-    /* NO button on right */
     #no {
       background: #adb5bd;
       color: white;
       left: 180px; /* Right of YES */
     }
 
-    /* Floating hearts */
     .heart {
       position: absolute;
       color: #ff5d8f;
@@ -90,16 +87,13 @@
       to { transform: translateY(-10vh) scale(1.5); opacity: 0; }
     }
 
-    /* Confetti */
     .confetti {
       position: fixed;
       width: 10px;
       height: 10px;
-      background: red;
-      animation: fall 3s linear forwards;
-      pointer-events: none;
       border-radius: 2px;
-      will-change: transform;
+      pointer-events: none;
+      animation: fall 3s linear forwards;
     }
 
     @keyframes fall {
@@ -121,27 +115,48 @@
     const noBtn = document.getElementById('no');
     const yesBtn = document.getElementById('yes');
 
-    // NO button runs away and rotates when mouse is near
-    document.addEventListener('mousemove', (e) => {
+    // Function to safely move NO button away from cursor
+    function moveNoButtonAway(mouseX, mouseY) {
       const rect = noBtn.getBoundingClientRect();
-      const btnX = rect.left + rect.width / 2;
-      const btnY = rect.top + rect.height / 2;
+      const btnWidth = rect.width;
+      const btnHeight = rect.height;
 
-      const dist = Math.hypot(e.clientX - btnX, e.clientY - btnY);
+      // Current NO position
+      let btnX = rect.left;
+      let btnY = rect.top;
 
-      if (dist < 120) {
-        let newX = Math.random() * (window.innerWidth - rect.width);
-        let newY = Math.random() * (window.innerHeight - rect.height);
+      // Distance vector from mouse to button center
+      const btnCenterX = btnX + btnWidth / 2;
+      const btnCenterY = btnY + btnHeight / 2;
+      const dx = btnCenterX - mouseX;
+      const dy = btnCenterY - mouseY;
+      const distance = Math.hypot(dx, dy);
 
-        noBtn.style.left = `${newX}px`;
-        noBtn.style.top = `${newY}px`;
+      if (distance < 100) { // threshold to move
+        // Normalize vector and move button 120px away
+        const moveX = (dx / distance) * 120;
+        const moveY = (dy / distance) * 120;
 
-        const rotateDeg = Math.floor(Math.random() * 360);
-        noBtn.style.transform = `rotate(${rotateDeg}deg)`;
+        // New target position
+        let newX = btnX + moveX;
+        let newY = btnY + moveY;
+
+        // Keep inside viewport
+        newX = Math.min(window.innerWidth - btnWidth, Math.max(0, newX));
+        newY = Math.min(window.innerHeight - btnHeight, Math.max(0, newY));
+
+        // Animate button smoothly
+        noBtn.style.left = newX + 'px';
+        noBtn.style.top = newY + 'px';
+        noBtn.style.transform = `rotate(${Math.random() * 360}deg)`;
       }
+    }
+
+    document.addEventListener('mousemove', (e) => {
+      moveNoButtonAway(e.clientX, e.clientY);
     });
 
-    // YES button triggers confetti poppers
+    // YES button logic
     yesBtn.addEventListener('click', () => {
       for (let i = 0; i < 150; i++) {
         const confetti = document.createElement('div');
@@ -152,13 +167,12 @@
         confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
         confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
         document.body.appendChild(confetti);
-
         setTimeout(() => confetti.remove(), 4000);
       }
       alert('YAY!!! 💖💖💖');
     });
 
-    // Floating hearts animation
+    // Floating hearts
     setInterval(() => {
       const heart = document.createElement('div');
       heart.className = 'heart';
@@ -167,10 +181,8 @@
       heart.style.fontSize = 15 + Math.random() * 30 + 'px';
       heart.style.animationDuration = 4 + Math.random() * 4 + 's';
       document.body.appendChild(heart);
-
       setTimeout(() => heart.remove(), 7000);
     }, 300);
   </script>
-
 </body>
 </html>
